@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="recruits_add">
+	<resultMap type="recruit_add" id="recruit_addResult">
+		<result property="re_en_no" column="re_en_no"></result>
+		<result property="re_en" column="re_en"></result>
+		<result property="favorable" column="favorable"></result>
+		<result property="cond" column="cond"></result>
+		<result property="salary" column="salary"></result>
+	</resultMap>
+
+	<insert id="insert" parameterType="recruit_add">
+		insert into recruit_add_table
+		values(NULL,#{re_en},#{favorable},#{cond},#{salary});
+	</insert>
+	<select id="selectContent" resultType="recruit_add">
+		select * from
+		recruit_add_table order by re_en_no desc;
+	</select>
+	<select id="select" parameterType="int" resultType="recruit_add">
+		select *
+		from
+		recruit_add_table where re_en_no=#{re_en_no};
+	</select>
+	<update id="update_add" parameterType="recruit_add">
+		update recruit_add_table
+		set re_en=#{re_en}, favorable=#{favorable}, cond=#{cond},
+		salary=#{salary} where
+		re_en_no=#{re_en_no};
+	</update>
+	<select id="selectList" resultType="recruit_add" parameterType="java.util.HashMap">
+		select *
+		from recruit_add_table where re_en=#{re_en};
+	</select>
+	<delete id="delete_add" parameterType="int">
+		delete from recruit_add_table where re_en_no=#{re_en_no};
+	</delete>
+	<select id="selectBoardContent" resultType="recruit_add" parameterType="java.util.HashMap">
+    	select * from recruit_add_table order by re_en_no desc, re_en_no asc limit #{start}, #{end};
+    </select>
+    <select id="selectContentCnt" resultType="int" parameterType="java.util.HashMap">
+        select count(re_en_no) from recruit_add_table;
+    </select>
+</mapper>

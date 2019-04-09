@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="surem_admins">
+	<resultMap type="surem_admin" id="surem_adminResult">
+		<result property="no" column="no" />
+		<result property="usercode" column="usercode" />
+		<result property="deptcode" column="deptcode" />
+		<result property="tell" column="tell" />
+		<result property="reserved_time" column="reserved_time" />
+	</resultMap>
+	<resultMap type="sms_td" id="sms_tdResult">
+		<result property="sms_no" column="sms_no" />
+		<result property="messages" column="messages" />
+		<result property="user_name" column="user_name" />
+		<result property="tell" column="tell" />
+		<result property="send_date" column="send_date" />
+		<result property="admin_id" column="admin_id" />
+		<result property="all_no" column="all_no" />
+		<result property="division" column="division" />
+		<result property="send_result" column="send_result" />
+		<result property="etc" column="etc" />
+		<result property="result" column="Result" />
+		<result property="error" column="Error" />
+	</resultMap>
+	<resultMap type="surem_result" id="surem_resultResult">
+		<result property="Result" column="Result" />
+		<result property="SeqNum" column="SeqNum" />
+		<result property="UserCode" column="UserCode" />
+		<result property="DeptCode" column="DeptCode" />
+		<result property="Phone" column="Phone" />
+		<result property="RTime" column="RTime" />
+		<result property="RecvTime" column="RecvTime" />
+		<result property="ReqPhone" column="ReqPhone" />
+		<result property="CallCount" column="CallCount" />
+		<result property="Error" column="Error" />
+		<result property="etc" column="etc" />
+	</resultMap>
+	<select id="surem_admin_select" resultType="surem_admin" parameterType="java.util.HashMap">
+		select * from surem_admin order by no desc limit 1;
+	</select>
+	<insert id="sms_td_insert" parameterType="sms_td">
+		insert into SMS_td values(NULL, #{messages},#{user_name},#{tell},now(),#{admin_id},#{all_no},#{division},#{send_result},#{etc},NULL,NULL);
+	</insert>
+	<select id="sms_select_all" resultType="sms_td" parameterType="java.util.HashMap">
+		select * from SMS_td order by sms_no desc;
+	</select>
+	<select id="sms_select_adminid" resultType="sms_td" parameterType="String">
+		select * from SMS_td where admin_id=#{admin_id} order by sms_no desc;
+	</select>
+	<select id="sms_select_no" resultType="int" parameterType="java.util.HashMap">
+		select sms_no from SMS_td order by sms_no desc limit 1;
+	</select>
+	<insert id="surem_result_insert" parameterType="surem_result">
+		insert into suremResult values(#{Result},#{SeqNum},#{UserCode},#{DeptCode},#{Phone},#{RTime},#{RecvTime},#{ReqPhone},#{CallCount},#{Error},#{etc});
+	</insert>
+	<select id="surem_result_select_num" resultType="surem_result" parameterType="java.util.HashMap">
+		select * from suremResult where SeqNum=#{SeqNum};
+	</select>
+	<update id="sms_update" parameterType="sms_td">
+		update SMS_td set Result=#{result}, Error=#{error} where sms_no=#{sms_no};
+	</update>
+</mapper>

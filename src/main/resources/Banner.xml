@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="banners">
+	<resultMap type="banner" id="bannerResult">
+		<result property="banner_no" column="bener_no" />
+		<result property="banner_filename" column="bener_filename" />
+		<result property="banner_extentionname" column="bener_extentionname" />
+		<result property="banner_path" column="bener_path" />
+		<result property="USE_YN" column="USE_YN" />
+		<result property="banner_ex" column="banner_ex" />
+		<result property="admin_id" column="admin_id" />
+		<result property="register_date" column="register_date" />
+		<result property="update_id" column="update_id" />
+		<result property="update_date" column="update_date" />
+		<result property="banner_url" column="banner_url" />
+		<result property="banner_last_date" column="banner_last_date" />
+		<result property="banner_start_date" column="banner_start_date" />
+		
+	</resultMap>
+	<insert id="insert" parameterType="banner">
+		insert into banner_tb values(NULL,#{banner_filename},#{banner_extentionname},#{banner_path},#{USE_YN},#{banner_ex},#{admin_id},now(),#{update_id},#{update_date},#{banner_url},#{banner_last_date},#{banner_start_date});
+	</insert>
+	<update id="update" parameterType="banner">
+		update banner_tb set banner_filename=#{banner_filename}, banner_extentionname=#{banner_extentionname}, banner_path=#{banner_path}, USE_YN=#{USE_YN}, banner_ex=#{banner_ex}, admin_id=#{admin_id}, register_date=#{register_date}, update_id=#{update_id}, update_date=#{update_date}, banner_url=#{banner_url}, banner_last_date=#{banner_last_date}, banner_start_date=#{banner_start_date} where banner_no=#{banner_no}; 
+	</update>
+	<select id="no_select" resultType="banner" parameterType="int">
+		select * from banner_tb where banner_no=#{banner_no};
+	</select>
+	<select id="select" resultType="banner" parameterType="java.util.HashMap">
+		select * from banner_tb where banner_no<![CDATA[ > ]]>1 order by banner_no;
+	</select>
+	<select id="main_select" resultType="banner" parameterType="java.util.HashMap">
+		select * from banner_tb where banner_start_date<![CDATA[ <= ]]>DATE(NOW()) and DATE(NOW())<![CDATA[ <= ]]>banner_last_date and banner_no<![CDATA[ > ]]>1;
+	</select>
+	<delete id="delete" parameterType="int">
+		delete from banner_tb where banner_no=#{banner_no};
+	</delete>
+	<select id="selectContentCnt" resultType="int" parameterType="java.util.HashMap">
+        select count(*) from banner_tb where USE_YN="Y";
+    </select>
+    <select id="banner_no_select" resultType="banner" parameterType="java.util.HashMap">
+    	select banner_no from banner_tb;
+    </select>
+</mapper>

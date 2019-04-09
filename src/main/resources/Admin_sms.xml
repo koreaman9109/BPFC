@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="admin_smss">
+	<resultMap type="admin_sms" id="admin_smsResult">
+		<result property="no" column="no" />
+		<result property="phone1" column="phone1" />
+		<result property="phone2" column="phone2" />
+		<result property="phone3" column="phone3" />
+		<result property="USE_YN" column="USE_YN" />
+		<result property="date" column="date"/>
+	</resultMap>
+	
+	<update id="update" parameterType="admin_sms">
+		update admin_sms_tb set phone1=#{phone1}, phone2=#{phone2}, phone3=#{phone3}, USE_YN=#{USE_YN}, date=now() where no=#{no};
+	</update>
+	
+	<select id="select" resultType="admin_sms" parameterType="int">
+		select * from admin_sms_tb where no=#{no};
+	</select>
+	
+	<insert id="insert" parameterType="admin_sms">
+		insert admin_sms_tb values(1, #{phone1}, #{phone2}, #{phone3}, #{USE_YN}, now());
+	</insert>
+</mapper>

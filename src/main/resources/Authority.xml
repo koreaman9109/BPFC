@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>	
+	<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="authoritys">
+	<resultMap type="authority" id="authorityResult">
+		<result property="admin_id" column="admin_id" />
+		<result property="admin_num" column="admin_num" />
+		<result property="board_id" column="board_id" />
+		<result property="authority" column="authority" />
+	</resultMap>
+
+	<insert id="insert" parameterType="authority">
+		insert into board_authority(admin_id, admin_num, board_id, authority, view_name) values(#{admin_id}, #{admin_num}, #{board_id}, '1', #{view_name});
+	</insert>
+
+	<select id="getAuth" parameterType="java.util.HashMap" resultType="String">
+    select b.authority
+	from admin_tb a
+	 left join board_authority b
+     on a.admin_id = b.admin_id
+	where b.board_id = #{board_id}
+			and a.admin_id = #{admin_id}
+     </select>
+     
+     <select id="getRecruitAuth" parameterType="java.util.HashMap" resultType="String">
+    select b.authority
+	from admin_tb a
+	 left join board_authority b
+     on a.admin_id = b.admin_id
+	where b.board_id = #{re_board_id}
+			and a.admin_id = #{admin_id}
+     </select>
+     
+     <select id="getView_name" parameterType="java.util.HashMap" resultType="String">
+    select b.view_name
+	from admin_tb a
+	 left join board_authority b
+     on a.admin_id = b.admin_id
+	where b.board_id = #{board_id}
+			and a.admin_id = #{admin_id}
+     </select>
+     
+     
+     		    <!-- 관리자 접속 권한 수정 -->
+   	<update id="delete" parameterType="authority">
+    	delete from board_authority
+    	where 
+    		admin_id = #{admin_id}
+    </update>
+    
+    <select id="adminAuthority" parameterType="String" resultType="authority">
+	select 
+		admin_id,
+	    board_id,
+        authority,
+        view_name
+	FROM 
+		board_authority
+	where 	
+		admin_id = #{admin_id};
+</select>
+    <select id="Authority_board_id"  resultType="authority" parameterType="java.util.HashMap">
+	select 
+		*
+	FROM 
+		board_authority
+	where 	
+		admin_id = #{admin_id};
+</select>
+
+		<!-- 권한 삭제 -->
+    	<delete id="autDelete" parameterType="java.util.HashMap">
+        delete
+        from
+            board_authority
+        where
+            admin_num = #{admin_num}
+            
+    	</delete>
+
+
+
+</mapper>

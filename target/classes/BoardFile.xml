@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>	
+	<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="boardFiles">
+	<resultMap type="boardFile" id="boardFileResult">
+		<result property="file_key" column="file_key" />
+		<result property="board_id" column="board_id" />
+		<result property="seq_id" column="seq_id" />
+		<result property="file_name" column="file_name" />
+		<result property="file_name2" column="file_name2" />
+		<result property="extention_name" column="extention_name" />
+		<result property="file_path" column="file_path" />
+		<result property="use_yn" column="use_yn" />
+		<result property="admin_id" column="admin_id" />
+		<result property="register_date" column="register_date" />
+		<result property="update_id" column="update_id" />
+		<result property="update_date" column="update_date" />
+	</resultMap>
+
+	<insert id="insert" parameterType="boardFile">
+		insert into board_file values(null, #{board_id}, #{seq_id}, #{file_name}, #{file_name2}, #{extention_name}, #{file_path}, #{admin_id}, now(), #{use_yn}, #{update_id}, now());
+	</insert>
+	
+	<select id="read" resultType="boardFile" parameterType="java.util.HashMap">
+		select 
+		file_key,
+		board_id,
+		seq_id,
+		file_name,
+		file_name2,
+		extention_name,
+		file_path,
+		use_yn,
+		admin_id,
+		register_date,
+		update_id,
+		update_date
+		from board_file
+		where seq_id=#{seq_id} and use_yn='Y';
+	</select>
+	
+	
+	
+	<update id="fileDelete" parameterType="java.util.HashMap">
+	    update
+            board_file
+            
+        <set>
+        use_yn = 'N',
+        update_date = now()
+        </set>
+        where  seq_id = #{seq_id};
+        
+        
+            
+	</update>
+	
+	<!-- 실제 board_file 테이블 삭제 쿼리 -->	
+	<!--
+	<delete id="fileDeleteByFileKey" parameterType="int">
+	    delete
+	    
+        from
+            board_file
+        where
+            file_key = #{fileKey};
+            
+	</delete>	-->
+	
+	<update id="fileDeleteByFileKey" parameterType="int">
+	    update
+	    board_file
+        
+        <set>
+        update_id = 'user',
+        use_yn = 'N',
+        update_date = now()
+        </set>
+        
+        where  file_key = #{fileKey};
+            
+	</update>	
+	
+	<!-- 파일 테이블   업데이트로 처리하는 쿼리 -->
+	 <update id="userFileDeleteBySeqid" parameterType="int">
+	    update
+	    board_file
+        
+        <set>
+        use_yn = 'N',
+        update_id = 'user',
+        update_date = now()
+        </set>
+        
+        where  seq_id = #{seq_id};
+            
+	</update>		
+
+	 <!-- 파일 테이블   업데이트로 처리하는 쿼리 -->
+	 <update id="fileDeleteBySeqid" parameterType="java.util.HashMap">
+	    update
+	    board_file
+        
+        <set>
+        use_yn = 'N',
+        update_id = #{update_id},
+        update_date = now()
+        </set>
+        
+        where  seq_id = #{seq_id};
+            
+	</update>
+	
+	    <!-- 게시물 삭제 2018-05-29 실제로 업데이트 처리 하는 쿼리-->
+    <update id="fileDeleteByBoardFile" parameterType="java.util.HashMap">
+        update
+            board_file
+        <set>
+        use_yn = 'N',
+        update_id = #{update_id},
+        update_date = now()
+        </set>    
+        where
+            file_key = #{file_key};
+            
+    </update>
+    
+        <!-- 2018-10-25 
+        	관리자 페이지 문의사항 목록에서 체크로 삭제처리하는 쿼리
+        	use_yn = 'n'
+        -->
+    <update id="inqiryFileDeleteBySeqid" parameterType="java.util.HashMap">
+        update
+            board_file
+        <set>
+        use_yn = 'N',
+        update_id = #{update_id},
+        update_date = now()
+        </set>
+        where  
+        seq_id in
+        (select seq_id from (select seq_id from board_tb where top_seq = #{seq_id} and use_yn = 'Y') as tmp);
+            
+    </update>		
+	
+	<select id="file_name" resultType="String" parameterType="java.util.HashMap">
+		select 
+			file_name
+		from 
+			board_file
+		where 
+			seq_id = #{seq_id}
+		and
+			board_id = #{board_id}; 
+	</select>
+	
+	<select id="list_file_name" resultType="String" parameterType="int">
+		select 
+			file_name
+		from 
+			board_file
+		where 
+			seq_id = #{seq_id};
+	</select>
+	
+	<select id="listImg" resultType="boardFile" parameterType="java.util.HashMap">
+	
+		select 
+			min(file_name) 
+		from 
+			board_file 
+		where 
+			file_key = #{file_key} 
+		and seq_id = #{seq_id};
+	</select>
+	
+	<select id="file_select" resultType="String" parameterType="String">
+		select 
+			file_name from board_file where file_name2=#{file_name2};
+	</select>
+</mapper>

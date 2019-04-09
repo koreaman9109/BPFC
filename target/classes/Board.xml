@@ -1,0 +1,884 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="boards">
+<!-- com.homepage.interlink.dao.BoardDao -->
+    <insert id="insertContent" parameterType="java.util.HashMap">
+        insert into board_tb(
+            seq_id,
+            board_id,
+			title,
+            content,
+            top_seq,
+            pre_seq,
+            step,
+            use_yn,
+            privacy_no,
+            admin_id,
+            view_name,
+            admin_rank,
+            admin_task,
+            admin_nickname,
+            admin_email,
+            admin_name,
+            admin_department,
+            register_date,
+            update_id,
+            update_date
+        )values(
+            #{seq_id},
+            #{board_id},
+			#{title},
+            #{content},
+            #{top_seq},
+            #{pre_seq},
+            #{step},
+            #{use_yn},
+            last_insert_id(),
+            #{admin_id},
+            #{view_name},
+            #{admin_rank},
+            #{admin_task},
+            #{admin_nickname},
+            #{admin_email},
+            #{admin_name},
+            #{admin_department},
+            now(),
+            #{update_id},
+            now()
+            
+        )
+        </insert>
+        
+        <insert id="lostInsertContent" parameterType="java.util.HashMap">
+        insert into board_tb(
+            seq_id,
+            board_id,
+			title,
+            content,
+            top_seq,
+            pre_seq,
+            step,
+            use_yn,
+            privacy_no,
+            admin_id,
+            view_name,
+            admin_rank,
+            admin_task,
+            admin_nickname,
+            admin_email,
+            admin_name,
+            admin_department,
+            register_date,
+            update_id,
+            update_date
+        )values(
+            #{seq_id},
+            #{board_id},
+			#{title},
+            #{content},
+            #{top_seq},
+            #{pre_seq},
+            '0',
+            #{use_yn},
+            last_insert_id(),
+            #{admin_id},
+            #{view_name},
+            #{admin_rank},
+            #{admin_task},
+            #{admin_nickname},
+            #{admin_email},
+            #{admin_name},
+            #{admin_department},
+            now(),
+            #{update_id},
+            now()
+            
+        )
+            
+    </insert>
+    <select id="selectBoardContentCnt" resultType="int" parameterType="java.util.HashMap">
+        select
+            count(seq_id)
+        from board_tb 
+     	where board_id = #{board_id} and use_yn = 'Y'
+     	<choose>
+	     	  <when test="sch_type == 'title'">
+			  AND title like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'content'">
+			  AND content like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'admin_id'">
+			  AND admin_id like CONCAT('%', #{sch_value}, '%')
+			  </when>
+	    </choose>
+    </select>
+    
+    
+    
+    <select id="getBoardAllCnt" resultType="int" parameterType="java.util.HashMap">
+    select
+	count(seq_id)
+        from board_tb;
+        </select>
+    
+    <select id="selectBoardContent" resultType="com.homepage.interlink.model.Board" parameterType="java.util.HashMap">
+        select 
+            a.seq_id,
+            a.board_id,
+			a.title,
+            a.content,
+            a.hit,
+            a.top_seq,
+            a.pre_seq,
+            a.step,
+            a.use_yn,
+            a.privacy_no,
+            a.admin_id,
+            a.view_name,
+            a.admin_name,
+            a.admin_rank,
+            a.admin_task,
+            a.admin_email,
+            a.admin_department,
+            date_format(a.register_date, '%Y-%m-%d %H:%i') register_date,
+            a.update_id,
+            date_format(a.update_date, '%Y-%m-%d %H:%i') update_date,
+            
+        		(select concat(b.file_path, b.file_name2) 
+                from board_file b 
+        	    where b.board_id = a.board_id
+        	    and b.seq_id = a.seq_id and b.use_yn = 'Y'
+                and LOWER(b.extention_name) in ('.png', '.jpg', '.gif', '.bmp', '.tif')
+                limit 1) as thumnail,
+                
+                (select concat(b.file_path,'thumb/thumb_', b.file_name2) 
+                from board_file b 
+        	    where b.board_id = a.board_id
+        	    and b.seq_id = a.seq_id and b.use_yn = 'Y'
+                and LOWER(b.extention_name) in ('.png', '.jpg', '.gif', '.bmp', '.tif')
+                limit 1) as list_thumnail
+                
+		  from board_tb a
+		 where a.board_id= #{board_id} and a.use_yn = 'Y'
+		 <choose>
+     	<when test="sch_type == 'title'">
+		  AND a.title like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'content'">
+		  AND a.content like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'admin_id'">
+		  AND a.admin_id like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  </choose>
+		 order by a.top_seq desc, a.seq_id asc 
+		 limit #{start}, #{end}
+		 
+		 
+     </select>
+     
+     
+     <!-- 분실물센터 리스트 쿼리 -->
+         <select id="lostBoardContent" resultType="com.homepage.interlink.model.Board" parameterType="java.util.HashMap">
+       select 
+       		  @ROWNUM := @ROWNUM + 1 AS num ,	
+       		  a.*,
+       		  b.*,
+       		  (select concat(c.file_path, c.file_name2) from  board_file c
+        where 
+        	c.seq_id = a.seq_id and c.board_id = a.board_id and c.use_yn = 'Y' limit 1) as thumnail,
+            (select concat(c.file_path,'thumb/thumb_', c.file_name2) from  board_file c
+        where 
+        	c.seq_id = a.seq_id and c.board_id = a.board_id and c.use_yn = 'Y' limit 1) as list_thumnail
+		from 
+			lost_tb a 
+	 	inner join 
+	 		board_tb b 
+     	on a.seq_id = b.seq_id
+     	and a.board_id = b.board_id , (SELECT @ROWNUM := 0) R
+     	where b.board_id= #{board_id} and b.use_yn='Y'
+		 <choose>
+     	<when test="sch_type == 'title'">
+		  AND a.title like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'content'">
+		  AND b.content like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'admin_id'">
+		  AND a.admin_id like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  </choose>
+		 order by num desc
+		 limit #{start}, #{end}
+		 
+		 
+     </select>
+     
+     
+     <select id="selectBoardMain" resultType="com.homepage.interlink.model.Board" parameterType="java.util.HashMap">
+		select * from board_tb where board_id = '1' and use_yn = 'Y' 
+		ORDER BY seq_id DESC 
+		LIMIT 4;
+	</select>
+    
+    <select id="selectBidMain" resultType="com.homepage.interlink.model.Board" parameterType="java.util.HashMap">
+		select * from board_tb where board_id = '4' and use_yn = 'Y'
+		ORDER BY seq_id DESC 
+		LIMIT 4;
+	</select>
+    
+    <select id="selectContentView" resultType="com.homepage.interlink.model.Board" parameterType="int">
+         select
+            a.seq_id,
+            a.board_id,
+            b.user_name,
+            replace(b.user_name, substring(b.user_name, 2), 'ㅇㅇ')as 'user_name2',
+            title,
+            content,
+            admin_id,
+            admin_rank,
+            admin_name,
+            view_name,
+            admin_department,
+            admin_task,
+            admin_nickname,
+            admin_email,
+            update_id,
+            hit,
+            top_seq,
+            step,
+            pre_seq,
+            inquiry_division,
+            cast(AES_DECRYPT(UNHEX(password), b.seq_id)as char )as password,
+            password as password2,
+            date_format(register_date, '%Y-%m-%d %H:%i') register_date
+
+        from
+            board_tb a left join inquiry_tb b on a.seq_id = b.seq_id
+        where
+            a.seq_id = #{seq_id}
+    </select>
+    
+    <select id="lostContentView" resultType="com.homepage.interlink.model.Board" parameterType="int">
+         select
+            a.seq_id,
+            a.board_id,
+            b.title,
+            a.content,
+            a.admin_id,
+            a.hit,
+            a.top_seq,
+            a.step,
+            a.pre_seq,
+            a.admin_name,
+            a.admin_rank,
+            a.admin_department,
+            a.admin_email,
+            a.admin_task,
+            a.register_date,
+            b.lost_id,
+            b.organization,
+            b.learn,
+            b.lost_date,
+            b.lost_name,
+            b.contact,
+            b.storage_site,
+            b.lost_status
+        
+        from
+            board_tb a left join lost_tb b on a.seq_id = b.seq_id
+        where
+            a.seq_id = #{seq_id}
+    </select>
+
+    
+    
+    <update id="updateBoardHit" parameterType="java.util.HashMap">
+        update board_tb set hit = hit + 1 where seq_id = #{seq_id}
+    
+    
+    </update>
+   
+   
+   
+   
+    <select id="selectBoardCnt" resultType="int" parameterType="java.util.HashMap">
+        select
+            count(seq_id)
+        from
+            board_tb
+        where
+            seq_id = #{seq_id}
+            
+    </select>
+
+ <!-- 게시판 리스트 삭제 2018-05-29 실제로 삭제되는 쿼리 -->
+  <!-- <delete id="ListDelete" parameterType="java.util.HashMap">
+        delete
+        from
+            board_tb
+        where
+            seq_id = #{seq_id}
+            
+    </delete> -->
+    
+    <!-- 게시판 리스트 삭제 2018-05-29 실제로 업데이트 처리 하는 쿼리 -->
+     <update id="ListDelete" parameterType="java.util.HashMap">
+        update 
+            board_tb
+		<set>
+		update_id = #{update_id},
+		use_yn = 'N',
+		update_date = now()
+		</set>
+        where
+            seq_id = #{seq_id};
+            
+        
+    </update> 
+    
+    <!-- 게시물 삭제 2018-05-29 실제로 업데이트 처리 하는 쿼리-->
+    <update id="BoardDelete" parameterType="java.util.HashMap">
+        update
+            board_tb
+        <set>
+        use_yn = 'N',
+        update_id = #{update_id},
+        update_date = now()
+        </set>    
+        where
+            seq_id = #{seq_id};
+            
+    </update>
+    
+     
+    <!-- 분실물 테이블 삭제 - 실제로 업데이트로 'N'처리 -->
+    <update id="lostDelete" parameterType="int">
+        update
+            lost_tb
+        <set>
+    	use_yn = 'N'
+    	</set>     
+        where
+            seq_id = #{seq_id}
+            
+    </update>
+    
+        <!-- 문의하기 사용자 게시물 삭제 -->
+    <update id="userDeleteInquiry" parameterType="int">
+    	update 
+    	inquiry_tb
+    	
+     	<set>
+    	use_yn = 'N'
+    	</set> 
+    	
+		where seq_id = #{seq_id}
+    </update>
+    <!-- 문의하기 삭제 -->
+    <update id="inquiryDetailDelete" parameterType="int">
+    	update 
+    	board_tb
+    	
+     	<set>
+    	use_yn = 'N',
+    	update_id = 'user',
+    	update_date = now()
+    	</set>
+    	
+		where seq_id = #{seq_id}
+    </update>
+    
+    <!-- 문의사항 목록 관리자 페이지에서 체크 삭제 by board_tb -->
+    <update id="inquiryListDelete" parameterType="java.util.HashMap">
+    	 update
+            board_tb
+        <set>
+        use_yn = 'N',
+        update_id = #{update_id},
+        update_date = now()
+        </set>
+        where
+            seq_id in
+            (select seq_id from (select seq_id from board_tb where top_seq = #{seq_id} and use_yn = 'Y') as tmp);
+    </update>
+    
+    <!-- 문의사항 목록 관리자 페이지에서 체크 삭제 by inquiry_tb -->
+    <update id="adminDeleteInquiry" parameterType="java.util.HashMap">
+    	update 
+    	inquiry_tb
+		<set>
+    	use_yn = 'N'
+    	</set> 
+    	where
+        seq_id in
+        (select seq_id from (select seq_id from board_tb where top_seq = #{seq_id}) as tmp);
+    </update>
+    	
+    
+    
+    <!-- 전체 텍스트 수정  / 문의하기, 분실물센터 제외-->
+    <update id="updateAllBoard" parameterType="java.util.HashMap">
+    	update 
+    	board_tb
+     	<set>
+    	<if test="title != null and title != ''">    	
+    	title = #{title},</if>
+    	update_id = #{update_id},
+    	content = #{content},
+    	update_date = now()
+    	</set> 
+
+
+    	where seq_id = #{seq_id}
+    	
+    
+    
+    </update>
+    
+    
+    <!--  문의하기 게시물 수정 -->
+    <update id="updateBoard" parameterType="java.util.HashMap">
+    	update 
+    	board_tb a inner join inquiry_tb b
+    	on a.seq_id = b.seq_id
+    	
+     	<set>
+    	<if test="title != null and title != ''">a.title = #{title},</if>
+    	a.content = #{content},
+    	a.update_date = now(),
+    	a.update_id = #{update_id},
+    	b.password = HEX(AES_ENCRYPT(#{password}, b.seq_id)),
+    	b.inquiry_division = #{inquiry_division}
+    	
+    	
+    	</set> 
+
+
+    	where a.seq_id = #{seq_id} and b.seq_id = #{seq_id} 
+    
+    </update>
+    
+        <!--  분실문센터 게시물 수정 --> <!-- 부장님한테 물어보기 05.01 -->
+    <update id="updateLostBoard" parameterType="java.util.HashMap">
+    	update 
+    		board_tb a inner join lost_tb b
+    		on a.seq_id = b.seq_id
+    		<set>
+			    	a.title = #{title},
+				    a.update_date = now(),
+			    	a.content = #{content},
+			    	a.update_id = #{update_id},
+			    	b.title = #{title},
+			        b.organization = #{organization},
+				    b.learn = #{learn},
+			        b.lost_date = #{lost_date},
+				    b.lost_name = #{lost_name},
+				    b.contact = #{contact},
+				    b.storage_site = #{storage_site},
+				    b.lost_status = #{lost_status}
+				    </set>
+		   	where 
+	   			a.seq_id = #{seq_id}
+    
+    </update>
+
+    <select id="read" resultType="com.homepage.interlink.model.Board" parameterType="int">
+		select * from board_tb where seq_id=#{seq_id};
+	</select>
+
+    <select id="max_seq_id" resultType="int" parameterType="int">
+    	SELECT Max(seq_id)as seq_id FROM board_tb GROUP BY board_id=#{board_id} desc limit 1
+    </select>
+    
+    <select id="getBoardSeq" resultType="int">
+    	select fn_getseq('board_seq', 'N')
+    </select> 
+    <select id="getPreSeq" resultType="int">
+    	select seq_id, title from  board_tb where seq_id=(select max(seq_id) from board_tb where seq_id > #{seq_id});
+	</select>
+	
+	<select id="getStep" resultType="int">
+		select step from board_tb where seq_id = #{seq_id};
+	</select>
+	
+	<select id="getSeq_id" resultType="int">
+		select seq_id from board_tb where seq_id = #{seq_id};
+	</select>
+	
+	<insert id="inquiryInsert" parameterType="java.util.HashMap">
+       
+       	 insert into inquiry_tb(
+       	    inquiry_id,
+			seq_id,
+            board_id,
+            user_name,
+            password,
+            inquiry_division,
+            use_yn
+            
+         )values(
+         	#{inquiry_id},
+            #{seq_id},
+            #{board_id},
+            #{user_name},
+			HEX(AES_ENCRYPT(#{password}, seq_id)),
+            #{inquiry_division},
+            #{use_yn}
+		)
+            
+    </insert>
+    
+    <!-- 문의하기 리스트 가져오는 곳  -->        
+    <!-- <select id="inquiryRead" resultType="com.homepage.interlink.model.Board" parameterType="java.util.HashMap">
+		select 
+		    @ROWNUM := @ROWNUM + 1 as num ,
+			a.seq_id,
+            b.board_id,
+            password,
+            inquiry_division,
+            use_yn,
+            title,
+            content,
+            b.admin_id,
+            replace(user_name, substring(user_name, 2), 'ㅇㅇ')as 'user_name',
+            hit,
+            top_seq,
+            step,
+            pre_seq,
+            date_format(register_date, '%Y-%m-%d %H:%i') register_date
+		
+		from (SELECT @ROWNUM := 0) R, inquiry_tb a left join board_tb b on a.seq_id = b.seq_id
+		 where a.board_id = '5'		 
+		 <choose>
+     	<when test="sch_type == 'title'">
+		  AND title like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'content'">
+		  AND content like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'admin_id'">
+		  AND b.admin_id like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  </choose>
+		 order by top_seq desc, seq_id asc
+		 order by top_seq desc, pre_seq asc  
+		 limit #{start}, #{end}
+	</select> -->
+	
+	<!-- <select id="inquiryRead" resultType="com.homepage.interlink.model.Board" parameterType="java.util.HashMap">
+		 select 
+			@ROWNUM := @ROWNUM + 1 as num, 
+            t.*
+          from
+            (
+		  select 
+			
+			a.seq_id,
+            b.board_id,
+            password,
+            inquiry_division,
+            use_yn,
+            title,
+            content,
+            b.admin_id,
+            replace(user_name, substring(user_name, 2), 'ㅇㅇ')as 'user_name2',
+            user_name,
+            hit,
+            top_seq,
+            step,
+            pre_seq,
+            date_format(register_date, '%Y-%m-%d %H:%i') register_date
+            
+		   from  
+			 inquiry_tb a left join board_tb b on a.seq_id = b.seq_id 
+		   group by top_seq desc, pre_seq asc
+           )t, (SELECT @ROWNUM := 0) R 
+           
+		   where board_id = '5' 
+		 <choose>
+     	<when test="sch_type == 'title'">
+		  AND title like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'content'">
+		  AND content like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'user_name'">
+		  AND user_name like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  </choose>
+
+		 limit #{start}, #{end};
+	</select> -->
+	
+	<!-- 문의사항 리스트 쿼리 rownum 말고 jsp에서 seq처리 -->
+	<!-- <select id="inquiryRead" resultType="com.homepage.interlink.model.Board" parameterType="java.util.HashMap">
+
+		 select 
+			
+			a.seq_id,
+            b.board_id,
+            password,
+            inquiry_division,
+            use_yn,
+            title,
+            content,
+            b.admin_id,
+            replace(user_name, substring(user_name, 2), 'ㅇㅇ')as 'user_name2',
+            user_name,
+            hit,
+            top_seq,
+            step,
+            pre_seq,
+            date_format(register_date, '%Y-%m-%d %H:%i') register_date
+            
+		   from  inquiry_tb a left join board_tb b on a.seq_id = b.seq_id 
+		   where a.board_id = '5' 
+		 <choose>
+     	  <when test="sch_type == 'title'">
+		  AND use_yn = 'Y' AND title like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'content'">
+		  AND use_yn = 'Y' AND content like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'user_name'">
+		  AND use_yn = 'Y' AND user_name like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  </choose>
+
+      	   group by top_seq desc, pre_seq asc
+		 limit #{start}, #{end}
+	</select> -->
+	
+	<!-- 
+	2018-10-04 문의하기 원글+답글 수정사항때문에 주석처리함(기존쿼리) _ 박권수
+	<select id="inquiryRead" resultType="com.homepage.interlink.model.Board" parameterType="java.util.HashMap">
+
+		  select 
+            a.seq_id,
+            b.board_id,         
+            password,   
+            inquiry_division,
+            b.use_yn,
+            title,
+            b.admin_id,
+            b.update_id,
+            b.view_name,
+            b.admin_name,
+            replace(user_name, substring(user_name, 2), 'ㅇㅇ')as 'user_name2',
+            user_name,
+            hit,
+            top_seq,
+            step,
+            pre_seq,
+            date_format(register_date, '%Y-%m-%d %H:%i') register_date
+            from  inquiry_tb a left join board_tb b on a.seq_id = b.seq_id  where top_seq in(
+           select 
+			top_seq
+		   from  inquiry_tb a left join board_tb b on a.seq_id = b.seq_id 
+		   where a.board_id = '5' 
+		 <choose>
+     	  <when test="sch_type == 'title'">
+		  AND b.use_yn = 'Y' AND title like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'content'">
+		  AND b.use_yn = 'Y' AND content like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'user_name'">
+		  AND b.use_yn = 'Y' AND user_name like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  </choose>
+		 )
+		 group by top_seq desc, pre_seq asc
+		 limit #{start}, #{end}
+	</select>
+ -->
+ 	
+	<!--
+	2018-10-04
+	문의하기 원글+답글 수정사항때문에 기존쿼리에서 수정
+	  -->
+	<select id="inquiryRead" resultType="com.homepage.interlink.model.Board" parameterType="java.util.HashMap">
+
+		  select 
+            a.seq_id,
+            b.board_id,         
+            password,   
+            inquiry_division,
+            b.use_yn,
+            title,
+            b.admin_id,
+            b.update_id,
+            b.view_name,
+            b.admin_name,
+            replace(user_name, substring(user_name, 2), 'ㅇㅇ')as 'user_name2',
+            user_name,
+            hit,
+            top_seq,
+            step,
+            (select count(*) from board_tb where board_id='5' and top_seq = b.top_seq and use_yn='y')as recnt,
+            pre_seq,
+            date_format(register_date, '%Y-%m-%d %H:%i') register_date
+            from  inquiry_tb a left join board_tb b on a.seq_id = b.seq_id   
+		   where a.board_id = '5' and b.step = '0' and b.use_yn = 'y'
+		 <choose>
+     	  <when test="sch_type == 'title'">
+		  AND b.use_yn = 'Y' AND title like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'content'">
+		  AND b.use_yn = 'Y' AND content like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'user_name'">
+		  AND b.use_yn = 'Y' AND user_name like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  </choose>
+		 
+		 group by seq_id desc
+		 limit #{start}, #{end}
+	</select>
+	
+	<!--
+	2018-10-04
+	문의하기 원글 + 답글 추가 관계로 기존 쿼리 주석처리함 
+	박권수
+	
+	<select id="selectInquiryContentCnt" resultType="int" parameterType="java.util.HashMap">
+        select
+            count(*)
+        from  inquiry_tb a left join board_tb b on a.seq_id = b.seq_id  where top_seq in( 
+     	select 
+			top_seq
+		   from  inquiry_tb a left join board_tb b on a.seq_id = b.seq_id 
+		where a.board_id = '5'    
+     	<choose>
+	     	<when test="sch_type == 'title'">
+			  AND b.use_yn = 'Y' AND title like CONCAT('%', #{sch_value}, '%') 
+			  </when>
+			  <when test="sch_type == 'content'">
+			  AND b.use_yn = 'Y' AND content like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'user_name'">
+			  AND b.use_yn = 'Y' AND user_name like CONCAT('%', #{sch_value}, '%')
+			  </when>
+	    </choose>
+	    )
+    </select>
+	 -->
+	 
+	 <select id="selectInquiryContentCnt" resultType="int" parameterType="java.util.HashMap">
+        select
+            count(*)
+        from  inquiry_tb a left join board_tb b on a.seq_id = b.seq_id  
+		where a.board_id = '5' and b.step='0' and b.use_yn = 'y'     
+     	<choose>
+	     	<when test="sch_type == 'title'">
+			  AND b.use_yn = 'Y' AND title like CONCAT('%', #{sch_value}, '%') 
+			  </when>
+			  <when test="sch_type == 'content'">
+			  AND b.use_yn = 'Y' AND content like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'user_name'">
+			  AND b.use_yn = 'Y' AND user_name like CONCAT('%', #{sch_value}, '%')
+			  </when>
+	    </choose>
+    </select>
+
+    <select id="passwordCheck" resultType="int" parameterType="java.util.HashMap">
+        SELECT 
+            COUNT(*) 
+        FROM 
+        	inquiry_tb
+        WHERE 
+        	seq_id = #{seq_id} and password= HEX(AES_ENCRYPT(#{password}, seq_id));
+    </select>
+    
+    <select id="viewInquiry" resultType="com.homepage.interlink.model.Inquiry" parameterType="java.util.HashMap"> 
+        select 
+            *
+        from inquiry_tb
+        where seq_id = #{seq_id}
+    </select>
+    
+     <insert id="lostCreate" parameterType="java.util.HashMap">
+       
+       	 insert into lost_tb(
+       	    lost_id,
+			seq_id,
+            board_id,
+            organization,
+            learn,
+            title,
+            lost_date,
+            lost_name,
+            contact,
+            storage_site,
+            lost_status,
+            use_yn
+            
+         )values(
+         	#{lost_id},
+			#{seq_id},
+            #{board_id},
+            #{organization},
+            #{learn},
+            #{title},
+            #{lost_date},
+            #{lost_name},
+            #{contact},
+            #{storage_site},
+            #{lost_status},
+            #{use_yn}
+		)
+
+
+            
+    </insert>
+    
+    <select id="viewLost" resultType="com.homepage.interlink.model.Lost" parameterType="java.util.HashMap"> 
+        select 
+            *
+        from inquiry_tb
+        where seq_id = #{seq_id}
+    </select>
+    <!-- 상세보기 이전 글, 다음 글 -->
+    <select id="preView" resultType="com.homepage.interlink.model.Board" parameterType="java.util.HashMap">
+    	
+    	select * from board_tb where board_id = #{board_id} and use_yn = 'Y' and <![CDATA[seq_id < #{seq_id}]]>  ORDER BY seq_id desc LIMIT 1;
+    													
+    </select>
+    
+    <select id="nextView" resultType="com.homepage.interlink.model.Board" parameterType="java.util.HashMap">
+    
+    	select * from board_tb where board_id = #{board_id} and use_yn = 'Y' and <![CDATA[seq_id > #{seq_id}]]>  ORDER BY seq_id asc LIMIT 1; 
+    
+    </select>
+    
+    <!-- 문의사항 사용자 상세보기 원글+답글 보이기 2018-10-04 -->
+    <!-- select 
+    		*,
+    		replace(b.user_name, substring(b.user_name, 2), 'ㅇㅇ')as 'user_name2',
+            c.use_yn as use_yn_file
+    	from 
+    		board_tb a left join inquiry_tb b on a.seq_id = b.seq_id 
+    		left join board_file c on a.seq_id = c.seq_id 
+    	where a.board_id='5' and a.seq_id and top_seq = #{seq_id} and a.use_yn = 'y' group by pre_seq;  -->
+ 		<!-- 2018-10-07  오후 5:10 쿼리 수정 업데이트 -->
+ 		
+    <select id="getInquiryDetail" resultType="com.homepage.interlink.model.Board" parameterType="java.util.HashMap">
+    
+    	
+ 		select a.*, b.* ,c.*,replace(b.user_name, substring(b.user_name, 2), 'ㅇㅇ')as 'user_name2',
+ 		c.use_yn as use_yn_file
+from board_tb a 
+	left join inquiry_tb b on a.seq_id = b.seq_id 
+    left join (select * from board_file as board_file where use_yn = 'Y' group by file_key asc) c on a.seq_id = c.seq_id
+where a.top_seq = #{seq_id} and a.board_id = '5' and a.use_yn = 'y' group by pre_seq asc;
+ 		   
+    </select>   
+   
+   <select id="getInquiryByUseYN" resultType="com.homepage.interlink.model.Board" parameterType="java.util.HashMap">
+   		select use_yn from board_tb where board_id = '5' and seq_id = #{seq_id};
+    </select>
+   </mapper>

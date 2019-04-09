@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>	
+	<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="privacy_agreements">
+	<resultMap type="privacy_agreement" id="privacy_agreementResult">
+		<result property="no" column="no" />
+		<result property="agreement" column="agreement" />
+		<result property="date" column="date" />
+	</resultMap>
+
+	<select id="last_select" parameterType="java.util.HashMap" resultType="privacy_agreement">
+		select * from privacy_agreement order by no desc limit 1;
+	</select>
+</mapper>

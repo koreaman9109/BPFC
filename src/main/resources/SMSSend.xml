@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="smssends">
+	<resultMap type="smssend" id="smssendResult">
+		<result property="SeqNo" column="SeqNo" />
+		<result property="InDate" column="InDate" />
+		<result property="InTime" column="InTime" />
+		<result property="Member" column="Member" />
+		<result property="SendId" column="SendId" />
+		<result property="SendName" column="SendName" />
+		<result property="Rphone1" column="Rphone1" />
+		<result property="Rphone2" column="Rphone2" />
+		<result property="Rphone3" column="Rphone3" />
+		<result property="RecvName" column="RecvName" />
+		<result property="Sphone1" column="Sphone1" />
+		<result property="Sphone2" column="Sphone2" />
+		<result property="Sphone3" column="Sphone3" />
+		<result property="Msg" column="Msg" />
+		<result property="Url" column="Url" />
+		<result property="Rdate" column="Rdate" />
+		<result property="Rtime" column="Rtime" />
+		<result property="Result" column="Result" />
+		<result property="Kind" column="Kind" />
+		<result property="ErrCode" column="ErrCode" />
+		<result property="Retry1" column="Retry1" />
+		<result property="Retry2" column="Retry2" />
+		<result property="LastTime" column="LastTime" />
+	</resultMap>
+	
+	<insert id="smsinsert" parameterType="smssend">
+		insert into SMSData (SeqNo, InDate, InTime, SendId, SendName, Rphone1, Rphone2, Rphone3, RecvName, Sphone1, Sphone2, Sphone3, Msg, Url, Rdate, Rtime, Result, Kind, ErrCode, Retry1, Retry2, LastTime) values(NULL, #{InDate}, #{InTime}, #{SendId}, #{SendName}, #{Rphone1}, #{Rphone2}, #{Rphone3}, #{RecvName}, #{Sphone1}, #{Sphone2}, #{Sphone3}, #{Msg}, #{Url}, #{Rdate}, #{Rtime}, #{Result}, #{Kind}, #{ErrCode}, #{Retry1}, #{Retry2}, #{LastTime});
+	</insert>
+</mapper>

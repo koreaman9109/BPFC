@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="admins">
+
+	
+  <select id="getAdmin_id" resultType="String">
+		select admin_id from admin_tb where admin_id = #{admin_id};
+	</select>	
+	
+  <select id="loginCheck" resultType="com.homepage.interlink.model.Admin">
+        select 
+        admin_id,
+        admin_name,
+        admin_department,
+        admin_nickname,
+        admin_rank,
+        admin_task,
+        admin_email,
+        admin_num
+        
+        
+         from admin_tb
+        <!--  where admin_id = #{admin_id} and admin_passwd = #{admin_passwd}; -->
+         where admin_id = #{admin_id} and admin_passwd = HEX(AES_ENCRYPT(#{admin_passwd}, admin_id));
+    </select>
+    
+    <select id="viewAdmin" resultType="com.homepage.interlink.model.Admin"> 
+        select 
+            admin_id,
+	        admin_name,
+	        admin_department,
+	        admin_nickname,
+	        admin_rank,
+	        admin_task,
+	        admin_email
+        from admin_tb
+        where admin_id = #{admin_id}
+    </select>
+    <!-- 권한 뷰 -->
+    <select id="viewAuthority" resultType="com.homepage.interlink.model.Authority">
+        select
+            admin_id,
+            admin_num,
+            board_id,
+            authority,
+            view_name
+        from
+            board_authority
+        where
+            admin_id = #{admin_id}
+    </select>
+    
+    <select id="adminList" resultType="com.homepage.interlink.model.Admin" parameterType="java.util.HashMap">
+        select 
+        	admin_num,
+        	admin_id,
+            admin_passwd,
+            admin_name,
+            admin_department,
+            admin_email,
+            authority,
+            date_format(register_date, '%Y-%m-%d %H:%i') register_date
+            from admin_tb
+            where authority = 1
+		   <choose>
+	          <when test="sch_type == 'admin_name'">
+			  AND admin_name like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'authority'">
+			  AND authority like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'admin_id'">
+			  AND admin_id like CONCAT('%', #{sch_value}, '%')
+			  </when>
+	    </choose>
+		 order by admin_num desc 
+		 limit #{start}, #{end}
+	 </select>
+	 
+    <select id="adminCnt" resultType="int" parameterType="java.util.HashMap">
+        select
+            count(admin_num)
+        from admin_tb
+		where authority = 1        
+        <choose>
+	     	<when test="sch_type == 'admin_name'">
+			  AND admin_name like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'authority'">
+			  AND authority like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'admin_id'">
+			  AND admin_id like CONCAT('%', #{sch_value}, '%')
+			  </when>
+	    </choose>
+    </select>
+    
+	 <insert id="create" parameterType="java.util.HashMap">
+        insert into admin_tb (
+        	admin_num,
+            admin_id,
+            admin_passwd,
+			admin_name,
+			admin_nickname,
+			admin_task,
+			admin_rank,
+			admin_department,
+            admin_email,
+            authority
+        
+        )
+        values(
+        	#{admin_num},
+            #{admin_id},
+            HEX(AES_ENCRYPT(#{admin_passwd}, admin_id)),
+			#{admin_name},
+			#{admin_nickname},
+			#{admin_task},
+			#{admin_rank},
+			#{admin_department},
+            #{admin_email},
+           '1'
+            
+            )
+        
+            
+    </insert>
+    
+    	<select id="read" resultType="com.homepage.interlink.model.Admin" parameterType="admin">
+    	
+		select  
+		admin_num,
+		admin_id,
+		<!-- cast(AES_DECRYPT(UNHEX(admin_passwd), admin_num)as char)as admin_passwd, -->
+		admin_nickname,
+		admin_rank,
+		admin_name,
+		admin_department,
+		admin_task,
+		admin_email
+		from admin_tb 
+		where admin_id=#{admin_id};
+		
+		
+	</select>
+	
+	  <select id="adminView" resultType="com.homepage.interlink.model.Admin" parameterType="String">
+        select
+            admin_num,
+            admin_id,
+            admin_name,
+            admin_nickname,
+            admin_rank,
+            admin_department,
+            admin_task,
+            cast(AES_DECRYPT(UNHEX(admin_passwd), admin_id)as char)as admin_passwd,
+            admin_email,
+            authority,
+            date_format(register_date, '%Y-%m-%d %H:%i:%s') register_date
+        from
+            admin_tb
+        where
+            admin_id = #{admin_id}
+    </select>
+    
+        <!-- 관리자 수정 -->
+    <update id="updateAdmin" parameterType="java.util.HashMap">
+    	update 
+    	admin_tb
+     	<set>
+    	<if test="admin_name != null and admin_name != ''"> admin_name = #{admin_name},</if>
+    	admin_nickname = #{admin_nickname},
+    	admin_rank = #{admin_rank},
+    	admin_department = #{admin_department},
+    	admin_task = #{admin_task},
+    	admin_email = #{admin_email},
+    	admin_passwd = HEX(AES_ENCRYPT(#{admin_passwd}, admin_id)),
+    	authority = #{authority}
+    	</set> 
+
+
+    	where admin_num = #{admin_num}
+    	
+   </update>
+   
+        <!-- 관리자 목록 리스트 삭제 -->
+        <delete id="adminListDelete" parameterType="java.util.HashMap">
+        delete
+        from
+            admin_tb
+        where
+            admin_num = #{admin_num}
+            
+    	</delete>
+    	
+    	<!-- 관리자 삭제 -->
+    	<delete id="adminDelete" parameterType="java.util.HashMap">
+        delete
+        from
+            admin_tb
+        where
+            admin_num = #{admin_num}
+            
+    	</delete>
+
+		<!-- 관리자 id 중복 체크 -->
+		<select id="idcheck" parameterType="String" resultType="Integer">
+		      SELECT COUNT(*) FROM admin_tb
+		      WHERE
+		          admin_id = #{admin_id};
+		</select>
+		<!-- 관리자 id 중복 체크 -->
+		<select id="nocheck" parameterType="String" resultType="Integer">
+		      SELECT COUNT(*) FROM member
+		      WHERE
+		          bpfc_no = #{bpfc_no};
+		</select>
+
+	<!-- 직원검색 -->
+	<select id="getEmployeeCnt" resultType="int" parameterType="java.util.HashMap">
+		select
+            count(bpfc_no)
+        from member 
+        <where>
+     	<choose>
+	     	  <when test="sch_type == 'bpfc_rank'">
+			  bpfc_rank like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'bpfc_department'">
+			  bpfc_department like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'bpfc_name'">
+			  bpfc_name like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'bpfc_task'">
+			  bpfc_task like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'bpfc_no'">
+			  bpfc_no like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  
+	    </choose>
+	    </where>
+	</select>
+	
+	<!-- 직원검색 리스트 -->
+	<select id="getEmployeeList" resultType="com.homepage.interlink.model.Member" parameterType="java.util.HashMap">
+		select
+            *
+        from member
+     	<where>
+     	<choose>
+	     	  <when test="sch_type == 'bpfc_rank'">
+			  bpfc_rank like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'bpfc_department'">
+			  bpfc_department like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'bpfc_name'">
+			  bpfc_name like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'bpfc_task'">
+			  bpfc_task like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'bpfc_no'">
+			  bpfc_no like CONCAT('%', #{sch_value}, '%')
+			  </when>
+	    </choose>
+	    </where>
+<!-- 	    order by bpfc_name asc
+	    limit #{start}, #{end} -->
+	</select>
+		  <select id="employeeView" resultType="com.homepage.interlink.model.Member" parameterType="String">
+        select
+            bpfc_no,
+            bpfc_name,
+            bpfc_rank,
+            bpfc_department,
+            bpfc_task
+        from
+            member
+        where
+            bpfc_no = #{bpfc_no}
+    </select>
+
+	 <select id="retireList" resultType="com.homepage.interlink.model.Admin" parameterType="java.util.HashMap">
+        select
+			a.admin_num,
+		 	a.admin_id, 
+		 	a.admin_name, 
+		 	a.admin_department, 
+            date_format(a.register_date, '%Y-%m-%d %H:%i') register_date,
+		 	a.authority
+		from member b RIGHT OUTER JOIN admin_tb a 
+		on b.bpfc_no = a.admin_id 
+		where b.bpfc_no is null and a.authority = 1 and a.admin_id not in ('bpfcadmin')
+		   <choose>
+	          <when test="sch_type == 'admin_name'">
+			  and a.admin_name like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'admin_id'">
+			  and a.admin_id like CONCAT('%', #{sch_value}, '%')
+			  </when>
+	    </choose>
+		 order by a.admin_num desc 
+		 limit #{start}, #{end}
+		 
+		 
+		 
+	 </select>
+	 
+	     <select id="retireCnt" resultType="int" parameterType="java.util.HashMap">
+        select
+            count(admin_num)
+        from member b RIGHT OUTER JOIN admin_tb a 
+		on b.bpfc_no = a.admin_id 
+		where b.bpfc_no is null and a.authority = 1 and a.admin_id not in ('bpfcadmin')
+        <choose>
+	     	<when test="sch_type == 'admin_name'">
+			  AND a.admin_name like CONCAT('%', #{sch_value}, '%')
+			  </when>
+			  <when test="sch_type == 'admin_id'">
+			  AND a.admin_id like CONCAT('%', #{sch_value}, '%')
+			  </when>
+	    </choose>
+    </select>
+    
+
+
+
+
+</mapper>
+    

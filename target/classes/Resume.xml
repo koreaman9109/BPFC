@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>	
+	<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="resumes">
+	<resultMap type="resume" id="resumeResult">
+		<result property="resume_no" column="resume_no" />
+		<result property="all_no" column="all_no" />
+		<result property="resume_file" column="resume_file" />
+		<result property="resume_extension" column="resume_extension" />
+		<result property="resume_path" column="resume_path" />
+		<result property="title" column="title" />
+		<result property="name" column="name" />
+		<result property="privacy_no" column="privacy_no" />
+		<result property="re_date" column="re_date" />
+		<result property="resume_file2" column="resume_file2" />
+		<result property="USE_YN" column="USE_YN" />
+		<result property="del_date" column="del_date" />
+	</resultMap>
+
+	<insert id="insert" parameterType="resume">
+		insert into resume values(NULL, #{all_no}, #{resume_file}, #{resume_extension}, #{resume_path}, #{title}, #{name}, #{privacy_no}, now(), #{resume_file2}, 'Y', '0');
+	</insert>
+	<select id="select" resultType="resume" parameterType="java.util.HashMap">
+		select * from resume order by re_date desc;
+	</select>
+	<delete id="delete" parameterType="int">
+		delete from resume where resume_no=#{resume_no};
+	</delete>
+	<select id="select_privacy_no" resultType="int" parameterType="int">
+		select resume_no from resume where privacy_no=#{privacy_no};
+	</select>
+	<select id="all_no_select" resultType="java.util.HashMap" parameterType="int">
+		select * from resume where all_no=#{all_no} and USE_YN="Y";
+	</select>
+	<select id="resume_no_select" resultType="resume" parameterType="int">
+		select * from resume where resume_no=#{resume_no} and USE_YN="Y";
+	</select>
+	<select id="file_select" resultType="String" parameterType="String">
+		select resume_file from resume where resume_file2=#{resume_file2};
+	</select>
+	<select id="delete_select" resultType="resume" parameterType="int">
+		select resume_file2, resume_extension, privacy_no from resume where resume_no=#{resume_no};
+	</select>
+	<update id="update" parameterType="resume">
+		update resume set resume_file=#{resume_file}, resume_extension=#{resume_extension}, re_date=now(), resume_file2=#{resume_file2} where resume_no=#{resume_no};
+	</update>
+	<update id="move_update" parameterType="resume">
+		update resume set all_no=#{all_no}, title=#{title} where resume_no=#{resume_no};
+	</update>
+	<update id="delete_update" parameterType="int">
+		update resume set USE_YN='N',del_date=now() where resume_no=#{resume_no};
+	</update>
+	<select id="overlap" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select * from resume where privacy_no in (select privacy_no from privacy where phone = HEX(AES_ENCRYPT(#{phone}, #{privacy_name}))) and USE_YN="Y";
+	</select>
+	<select id="overlap1" resultType="int" parameterType="java.util.HashMap">
+		<!-- select resume_no from resume where title in(select title from resume where privacy_no in(select privacy_no from privacy where phone = HEX(AES_ENCRYPT(#{phone}, #{privacy_name})))) and all_no=#{check1}; -->
+		select resume_no from resume where privacy_no in(select privacy_no from privacy where phone = HEX(AES_ENCRYPT(#{phone}, #{privacy_name}))) and all_no=#{check1} and USE_YN="Y";
+	</select>
+	<select id="resumeCount" resultType="int" parameterType="int">
+    	select count(resume_no) from resume where all_no=#{all_no} and USE_YN="Y";
+    </select>
+</mapper>

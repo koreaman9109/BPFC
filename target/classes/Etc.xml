@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="etcs">
+
+	<!-- ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ -->
+
+
+	<!-- 삭제된리스트 sql -->
+	<select id="selectDelContent" resultType="com.homepage.interlink.model.Board"
+		parameterType="java.util.HashMap">
+		select
+		seq_id,
+		board_id,
+		title,
+		content,
+		admin_id,
+		hit,
+		top_seq,
+		pre_seq,
+		step,
+		use_yn,
+		privacy_no,
+		date_format(register_date, '%Y-%m-%d %H:%i')
+		register_date,
+		update_id,
+		date_format(update_date, '%Y-%m-%d %H:%i')
+		update_date
+		from board_tb
+		where board_id=#{board_id} and use_yn = 'N'
+		<choose>
+			<when test="sch_type == 'title'">
+				AND title like CONCAT('%', #{sch_value}, '%')
+			</when>
+			<when test="sch_type == 'content'">
+				AND content like CONCAT('%', #{sch_value}, '%')
+			</when>
+			<when test="sch_type == 'admin_id'">
+				AND admin_id like CONCAT('%', #{sch_value}, '%')
+			</when>
+		</choose>
+		order by update_date desc
+		limit #{start}, #{end};
+	</select>
+
+	<select id="selectDelContentCnt" resultType="int" parameterType="java.util.HashMap">
+		select
+		count(seq_id)
+		from board_tb
+		where board_id=#{board_id} and use_yn
+		= 'N'
+		<choose>
+			<when test="sch_type == 'title'">
+				AND title like CONCAT('%', #{sch_value}, '%')
+			</when>
+			<when test="sch_type == 'content'">
+				AND content like CONCAT('%', #{sch_value}, '%')
+			</when>
+			<when test="sch_type == 'admin_id'">
+				AND admin_id like CONCAT('%', #{sch_value}, '%')
+			</when>
+		</choose>
+	</select>
+
+	<delete id="ListDeleteBySeq_id" parameterType="java.util.HashMap">
+		delete
+		from
+		board_tb
+		where
+		seq_id = #{seq_id}
+
+	</delete>
+
+	<delete id="fileDeleteBySeq_id" parameterType="java.util.HashMap">
+		delete
+
+		from
+		board_file
+		where
+		seq_id = #{seq_id};
+
+	</delete>
+
+	<delete id="lostDeleteBySeq_id" parameterType="java.util.HashMap">
+		delete
+
+		from
+		lost_tb
+		where
+		seq_id = #{seq_id};
+
+	</delete>
+
+	<select id="list_file_name" resultType="String" parameterType="int">
+		select
+		file_name2
+		from
+		board_file
+		where
+		seq_id = #{seq_id};
+	</select>
+
+	<select id="list_file_path" resultType="String" parameterType="int">
+		select
+		file_path
+		from
+		board_file
+		where
+		seq_id = #{seq_id};
+	</select>
+
+	<!-- 휴지통 게시판 테이블 복구 문의사항, 분실물 제외 -->
+	<update id="ListRestoreBySeq_id" parameterType="java.util.HashMap">
+		update
+		board_tb
+		<set>
+			use_yn = 'Y',
+			update_date = now()
+		</set>
+		where
+		seq_id = #{seq_id};
+
+	</update>
+	<!-- 휴지통 파일 테이블 복구 문의사항, 분실물 제외 -->
+	<update id="fileRestoreBySeq_id" parameterType="java.util.HashMap">
+		update
+		board_file
+
+		<set>
+			use_yn = 'Y',
+			update_date = now()
+		</set>
+
+		where seq_id = #{seq_id};
+	</update>
+	<!-- 분실물 테이블 복구 -->
+	<update id="lostRestoreBySeq_id" parameterType="java.util.HashMap">
+		update
+		lost_tb
+		<set>
+			use_yn = 'Y'
+		</set>
+		where seq_id = #{seq_id};
+
+	</update>
+	<!-- 휴지통 게시물 파일 N인것 로드 -->
+	<select id="getRead" resultType="boardFile" parameterType="java.util.HashMap">
+		select
+		file_key,
+		board_id,
+		seq_id,
+		file_name,
+		file_name2,
+		extention_name,
+		file_path,
+		admin_id,
+		register_date,
+		use_yn,
+		update_date
+		from board_file
+		where
+		seq_id=#{seq_id};
+	</select>
+
+	<!-- 컨벤션 삭제된 것 리스트 출력 sql -->
+	<select id="selectDelConventionContent" resultType="com.homepage.interlink.model.Convention"
+		parameterType="java.util.HashMap">
+		select
+		con_no,
+		event_name,
+		con_place,
+		con_division,
+		con_end_date,
+		use_yn
+
+		from convention_tb
+		where use_yn = 'N'
+		<choose>
+			<when test="sch_type == 'event_name'">
+				AND event_name like CONCAT('%', #{sch_value}, '%')
+			</when>
+			<when test="sch_type == 'con_place'">
+				AND con_place like CONCAT('%', #{sch_value}, '%')
+			</when>
+			<when test="sch_type == 'con_division'">
+				AND con_division like CONCAT('%', #{sch_value}, '%')
+			</when>
+		</choose>
+		order by con_end_date asc
+		limit #{start}, #{end};
+	</select>
+	<!-- 컨벤션 삭제된 것 리스트 페이징 sql -->
+	<select id="selectDelConventionContentCnt" resultType="int"
+		parameterType="java.util.HashMap">
+		select
+		count(con_no)
+		from convention_tb
+		where use_yn = 'N'
+		<choose>
+			<when test="sch_type == 'event_name'">
+				AND event_name like CONCAT('%', #{sch_value}, '%')
+			</when>
+			<when test="sch_type == 'con_place'">
+				AND con_place like CONCAT('%', #{sch_value}, '%')
+			</when>
+			<when test="sch_type == 'con_division'">
+				AND con_division like CONCAT('%', #{sch_value}, '%')
+			</when>
+		</choose>
+	</select>
+	<!-- 채용 삭제된 것 리스트 출력 sql -->
+	<select id="selectDelRecruitContent" resultType="com.homepage.interlink.model.Recruit"
+		parameterType="java.util.HashMap">
+		select
+		all_no,
+		title,
+		day,
+		chec,
+		period,
+		check_no,
+		use_yn
+
+		from recruit_table
+		where use_yn = 'N'
+		<choose>
+			<when test="sch_type == 'title'">
+				AND title like CONCAT('%', #{sch_value}, '%')
+			</when>
+			<when test="sch_type == 'period'">
+				AND period like CONCAT('%', #{sch_value}, '%')
+			</when>
+		</choose>
+		order by all_no asc
+		limit #{start}, #{end};
+	</select>
+	<!-- 채용 삭제된 것 리스트 페이징 sql -->
+	<select id="selectDelRecruitContentCnt" resultType="int"
+		parameterType="java.util.HashMap">
+		select
+		count(all_no)
+		from recruit_table
+		where use_yn = 'N'
+		<choose>
+			<when test="sch_type == 'title'">
+				AND title like CONCAT('%', #{sch_value}, '%')
+			</when>
+			<when test="sch_type == 'period'">
+				AND period like CONCAT('%', #{sch_value}, '%')
+			</when>
+		</choose>
+	</select>
+
+</mapper>

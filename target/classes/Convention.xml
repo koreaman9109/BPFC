@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="conventions">
+	<resultMap type="convention" id="conventionResult">
+		<result property="con_no" column="con_no" />
+		<result property="con_start_date" column="con_start_date" />
+		<result property="con_end_date" column="con_end_date" />
+		<result property="con_time" column="con_time" />
+		<result property="event_name" column="event_name" />
+		<result property="con_place" column="con_place" />
+		<result property="con_phone" column="con_phone" />
+		<result property="con_division" column="con_division" />
+		<result property="con_usage" column="con_usage" />
+		<result property="con_paricipants" column="con_paricipants" />
+		<result property="con_organizer" column="con_organizer" />
+		<result property="con_setting" column="con_setting" />
+		<result property="con_check" column="con_check" />
+		<result property="con_rent" column="con_rent" />
+		<result property="con_deposit" column="con_deposit" />
+		<result property="con_paymentdate" column="con_paymentdate" />
+		<result property="con_payment" column="con_payment" />
+		<result property="con_etc1" column="con_etc1" />
+		<result property="con_etc2" column="con_etc2" />
+		<result property="USE_YN" column="USE_YN" />
+		<result property="admin_id" column="admin_id" />
+		<result property="admin_name" column="admin_name" />
+		<result property="update_date" column="update_date" />
+		<result property="update_id" column="update_id" />
+	</resultMap>
+	
+	<insert id="insert" parameterType="convention">
+		insert into convention_tb values(NULL, #{con_start_date}, #{con_end_date}, #{con_time}, #{event_name}, #{con_place}, #{con_phone}, #{con_division}, #{con_usage}, #{con_paricipants}, #{con_organizer}, #{con_setting}, #{con_check}, #{con_rent}, #{con_deposit}, #{con_paymentdate}, #{con_payment}, #{con_etc1}, #{con_etc2}, "Y", #{admin_id}, #{admin_name}, NULL, NULL);
+	</insert>
+	
+	<select id="select" resultType="convention" parameterType="java.util.HashMap">
+		select * from convention_tb where USE_YN="Y" order by con_no desc;
+	</select>
+	
+	<select id="select1" resultType="convention" parameterType="java.util.HashMap">
+		select * from convention_tb where (con_end_date, '%y/%m/%d')<![CDATA[ >= ]]>(#{day}, '%y/%m/%d') and USE_YN="Y" order by con_no desc;
+	</select>
+	
+	<select id="conno_select" resultType="convention" parameterType="int">
+		select * from convention_tb where con_no=#{con_no} and USE_YN="Y";
+	</select>
+	
+	<delete id="conno_delete" parameterType="int">
+		delete from convention_tb where con_no=#{con_no};
+	</delete>
+	
+	<update id="update" parameterType="convention">
+		update convention_tb set con_start_date=#{con_start_date}, con_end_date=#{con_end_date}, con_time=#{con_time}, event_name=#{event_name}, con_place=#{con_place}, con_phone=#{con_phone}, con_division=#{con_division}, con_usage=#{con_usage}, con_paricipants=#{con_paricipants}, con_organizer=#{con_organizer}, con_setting=#{con_setting}, con_check=#{con_check}, con_rent=#{con_rent}, con_deposit=#{con_deposit}, con_paymentdate=#{con_paymentdate}, con_payment=#{con_payment}, con_etc1=#{con_etc1}, con_etc2=#{con_etc2}, update_date=now(), update_id=#{update_id} where con_no=#{con_no};
+	</update>
+	<select id="date_select" resultType="java.util.HashMap" parameterType="String">
+		select * from convention_tb where (con_start_date, '%y/%m/%d') <![CDATA[ <= ]]> (#{date}, '%y/%m/%d') and (#{date}, '%y/%m/%d') <![CDATA[ <= ]]> (con_end_date, '%y/%m/%d') and USE_YN="Y";
+	</select>
+	
+	
+	
+	<select id="selectBoardContent" resultType="convention" parameterType="java.util.HashMap">
+    	select * from convention_tb where USE_YN="Y"
+    	<!--/*  날   짜: 2018-06-14 16:10
+		 * 	내   용: 검색 조건 문 추가
+		 * 	이   름: 박권수
+		 */ -->
+    	 <choose>
+     	<when test="sch_type == 'event_name'">
+		  AND event_name like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'con_organizer'">
+		  AND con_organizer like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'con_date'">
+		  AND (con_start_date, '%y/%m/%d') <![CDATA[ <= ]]> (#{sch_value}, '%y/%m/%d') and (#{sch_value}, '%y/%m/%d') <![CDATA[ <= ]]> (con_end_date, '%y/%m/%d')
+		  </when>
+		  </choose>
+    	 order by con_no desc, con_no asc limit #{start}, #{end};
+    </select>
+    <select id="selectContentCnt" resultType="int" parameterType="java.util.HashMap">
+        select count(con_no) from convention_tb where USE_YN="Y" 
+        <!--/*  날   짜: 2018-06-14 16:10
+		 * 	내   용: 검색 조건 문 추가
+		 * 	이   름: 박권수
+		 */ -->
+        <choose>
+     	<when test="sch_type == 'event_name'">
+		  AND event_name like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'con_organizer'">
+		  AND con_organizer like CONCAT('%', #{sch_value}, '%')
+		  </when>
+		  <when test="sch_type == 'con_date'">
+		  AND (con_start_date, '%y/%m/%d') <![CDATA[ <= ]]> (#{sch_value}, '%y/%m/%d') or (#{sch_value}, '%y/%m/%d') <![CDATA[ <= ]]> (con_end_date, '%y/%m/%d')
+		  </when>
+		  </choose>
+    </select>
+    <update id="user_del" parameterType="convention">
+    	update convention_tb set USE_YN=#{USE_YN} where con_no=#{con_no};
+    </update>
+	
+</mapper>

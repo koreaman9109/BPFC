@@ -1,0 +1,23 @@
+<NAS DB접속>
+jdbc.driverClassName=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://interlinknc.synology.me/interlink1
+jdbc.username=interlink1
+jdbc.password=test
+jdbc.maxPoolSize=20
+
+<local 내 PC DB접속>
+jdbc.driverClassName=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/interlink1
+jdbc.username=root
+jdbc.password=test
+jdbc.maxPoolSize=20
+
+<cafe24 DB>
+jdbc.driverClassName=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/interlink2
+jdbc.username=interlink2
+jdbc.password=link8998
+jdbc.maxPoolSize=20
+
+
+

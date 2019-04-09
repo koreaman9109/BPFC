@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="recruits">
+	<resultMap type="recruit" id="recruitResult">
+		<result property="all_no" column="all_no" />
+		<result property="title" column="title" />
+		<result property="re_en" column="re_en" />
+		<result property="no" column="no" />
+		<result property="favorable" column="favorable" />
+		<result property="employment" column="employment" />
+		<result property="cond" column="cond" />
+		<result property="place" column="place" />
+		<result property="salary" column="salary" />
+		<result property="period" column="period" />
+		<result property="way" column="way" />
+		<result property="date" column="date" />
+		<result property="etc" column="etc" />
+		<result property="file" column="file" />
+		<result property="chec" column="chec" />
+		<result property="day" column="day" />
+		<result property="check_no" column="check_no" />
+		<result property="file2" column="file2" />
+		<result property="USE_YN" column="USE_YN" />
+		<result property="admin_id" column="admin_id" />
+		<result property="view_name" column="view_name" />
+		<result property="admin_name" column="admin_name" />
+		<result property="update_date" column="update_date" />
+		<result property="update_id" column="update_id" />
+	</resultMap>
+
+	<insert id="insert"  parameterType="recruit">
+		insert into recruit_table
+		values(NULL,#{title},#{re_en},#{no},#{favorable},#{employment},#{cond},#{place},#{salary},#{period},#{way},#{date},#{etc},#{file},#{chec},now(),#{check_no},#{file2},#{fileExt},'Y',#{admin_id},#{view_name},#{admin_name},#{update_date},#{update_id})
+	</insert>
+	<select id="read" resultType="recruit" parameterType="int">
+		select * from recruit_table where all_no=#{all_no} and USE_YN='Y';
+	</select>
+	<select id="selectContent" resultType="recruit"
+		parameterType="java.util.HashMap">
+		select all_no,title,chec,day,check_no,re_en from recruit_table where USE_YN='Y' order by all_no desc;
+	</select>
+	<select id="selectContentCnt" resultType="int" parameterType="java.util.HashMap">
+        select count(all_no) from recruit_table where USE_YN='Y';
+    </select>
+    <select id="checCnt" resultType="int" parameterType="java.util.HashMap">
+    	select count(*) from recruit_table where USE_YN='Y' and chec='1';
+    </select>
+    <delete id="delete" parameterType="int">
+    	delete from recruit_table where all_no=#{check_no};
+    </delete>
+    <update id="update" parameterType="recruit">
+    	update recruit_table set title=#{title}, re_en=#{re_en}, no=#{no}, favorable=#{favorable}, employment=#{employment}, cond=#{cond}, place=#{place}, salary=#{salary}, period=#{period}, way=#{way}, date=#{date}, chec=#{chec}, update_date=now(), update_id=#{update_id} where all_no=#{all_no};
+    </update>
+    <update id="update2" parameterType="recruit">
+    	update recruit_table set file=#{file}, file2=#{file2}, fileExt=#{fileExt}, update_date=now(), update_id=#{update_id} where all_no=#{all_no};
+    </update>
+    <select id="chec_select" resultType="recruit" parameterType="java.util.HashMap">
+    	select all_no,title,re_en from recruit_table where chec=1 and USE_YN='Y' order by all_no desc;
+    </select>
+    <update id="updateRecuitchek" parameterType="int">
+    	update recruit_table set check_no = check_no + 1 where all_no = #{all_no};
+    </update>
+    <select id="filename_select" parameterType="String" resultType="recruit">
+    	select file from recruit_table where file2=#{filename} and USE_YN='Y';
+    </select>
+    <select id="select_tin" resultType="recruit" parameterType="java.util.HashMap">
+    	SELECT * FROM recruit_table where USE_YN='Y' ORDER BY all_no DESC LIMIT 3;
+    </select>
+    <select id="select_tin_main" resultType="recruit" parameterType="java.util.HashMap">
+    	SELECT * FROM recruit_table where USE_YN='Y' ORDER BY all_no DESC LIMIT 4;
+    </select>
+    <select id="selectBoardContent" resultType="recruit" parameterType="java.util.HashMap">
+    	select * from recruit_table where USE_YN='Y' order by all_no desc, all_no asc limit #{start}, #{end};
+    </select>
+    <update id="user_del" parameterType="recruit">
+    	update recruit_table set USE_YN=#{USE_YN} where all_no=#{all_no};
+    </update>
+    
+    <!-- 채용공고 이전 글, 다음 글 -->
+    <select id="preView" resultType="recruit" parameterType="java.util.HashMap">
+    	
+    	select * from recruit_table where USE_YN='Y' and <![CDATA[all_no < #{all_no}]]>  ORDER BY all_no desc LIMIT 1;
+    													
+    </select>
+    
+    <select id="nextView" resultType="recruit" parameterType="java.util.HashMap">
+    
+    	select * from recruit_table where USE_YN='Y' and <![CDATA[all_no > #{all_no}]]>  ORDER BY all_no asc LIMIT 1; 
+    
+    </select>
+    
+</mapper>

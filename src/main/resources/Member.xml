@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="members">
+	<resultMap type="member" id="memberResult">
+		<result property="bpfc_rank" column="bpfc_rank" />
+		<result property="bpfc_department" column="bpfc_department" />
+		<result property="bpfc_name" column="bpfc_name" />
+		<result property="bpfc_phone" column="bpfc_phone" />
+		<result property="bpfc_task" column="bpfc_task" />
+		<result property="bpfc_task2" column="bpfc_task2" />
+		<result property="bpfc_no" column="bpfc_no" />
+	</resultMap>
+	
+	<select id="select" resultType="member" parameterType="java.util.HashMap">
+		select * from member order by no desc;
+	</select>
+	
+	<select id="department_select" resultType="java.util.HashMap" parameterType="String">
+		select * from member where bpfc_department=#{department};
+	</select>
+	
+	<select id="select_all" resultType="member" parameterType="java.util.HashMap">
+		select * from member where 
+		<choose>
+		<when test="b-organization__select == 'bpfc_department'">
+		 bpfc_department=#{b-organization__search}
+		 </when>
+		 <when test="b-organization__select == 'bpfc_name'">
+		 bpfc_name=#{b-organization__search}
+		 </when>
+		</choose>
+	</select>
+	
+	<select id="sch_select" resultType="member" parameterType="java.util.HashMap">
+		select * from member where
+		<choose>
+		<when test="sch_type == 'bpfc_task2' and sch_value.equals('사장')">
+			bpfc_rank='사장'
+		</when>
+		<when test="sch_type == 'bpfc_task2' and sch_value.equals('본부장')">
+			bpfc_rank='본부장'
+		</when>
+		<when test="sch_type == 'bpfc_department'">
+			bpfc_department like CONCAT('%', #{sch_value}, '%')
+		</when>
+		<when test="sch_type == 'bpfc_task2'">
+			bpfc_task2 like CONCAT('%', #{sch_value}, '%')
+		</when>
+		<when test="sch_type == 'bpfc_name'">
+			bpfc_name like CONCAT('%', #{sch_value}, '%')
+		</when>
+		</choose>
+		order by bpfc_task2 asc, FIELD(bpfc_rank, '사장', '본부장', '실장', '팀장', '부장', '차장', '과장', '대리', '주임', '사원1', '사원2'), bpfc_task asc;
+	</select>
+
+			  
+	
+	
+</mapper>

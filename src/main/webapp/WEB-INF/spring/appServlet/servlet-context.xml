@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing 
+		infrastructure -->
+
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<annotation-driven />
+
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving 
+		up static resources in the ${webappRoot}/resources directory -->
+	<resources mapping="/resources/**" location="/resources/" />
+	<resources mapping="/css/**" location="/WEB-INF/css/" />
+	<resources mapping="/js/**" location="/WEB-INF/js/" />
+	<resources mapping="/fonts/**" location="/WEB-INF/fonts/" />
+	<resources mapping="/images/**" location="/WEB-INF/images/" />
+	<resources mapping="/lib/**" location="/WEB-INF/lib/" />
+	<resources mapping="/ckeditor/**" location="/WEB-INF/ckeditor/" />
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources 
+		in the /WEB-INF/views directory -->
+	<beans:bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="order" value="2" />
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+
+	<context:component-scan base-package="com.homepage.interlink" />
+
+	<beans:bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	</beans:bean>
+
+	<beans:bean id="fileViewResolver"
+		class="org.springframework.web.servlet.view.BeanNameViewResolver">
+		<beans:property name="order" value="0" />
+	</beans:bean>
+	
+	<beans:bean id="interceptorss" class="com.homepage.interlink.interceptor.userCheckInterceptor">
+	</beans:bean>
+<!-- Interceptor 설정 -->
+    <interceptors>
+        <interceptor>
+        
+        	<!-- intercept admin controller -->
+        	<mapping path="/inquiry-body.do"/>
+       		<!-- 관리자 페이지 intercepter 제외 -->
+            <exclude-mapping path="/passwordLoginForm.do"/>
+            <exclude-mapping path="/passwordLoginCheck.do"/>
+            
+            <beans:ref bean="interceptorss"/>
+        </interceptor>
+    </interceptors>
+	
+	<!-- 인터셉터객체생성 -->
+	<beans:bean id="interceptors" class="com.homepage.interlink.interceptor.LoginCheckInterceptor">
+	</beans:bean>	
+	<!-- Interceptor 설정 -->
+    <interceptors>
+        <interceptor>
+        
+        	<!-- intercept admin controller -->
+        	<mapping path="/admin_list.do"/>
+       		<mapping path="/admin_join.do"/>
+       		<mapping path="/idcheck.do"/>
+       		<mapping path="/admin_view.do"/>
+       		<mapping path="/adminUpdateForm.do"/>
+       		<mapping path="/adminUpdate.do"/>
+       		<mapping path="/adminListDelete.do"/>
+       		<mapping path="/adminDelete.do"/>
+       		<!-- 2018-07-24 새로 추가한 인터셉터 -->
+       		<mapping path="/admin_insert.do"/>
+       		<mapping path="/employee_serach.do"/>
+       		<mapping path="/nocheck.do"/>
+       		<mapping path="/admin_sms.do"/>
+       		<mapping path="/admin_sms_save.do"/>
+       		<mapping path="/retire_admin_list.do"/>
+       		<!-- 2018-07-26 새로 추가한 인터셉터 -->
+       		<mapping path="/sms_view1.do"/>
+       		<mapping path="/sms_result.do"/>
+       		<mapping path="/send_api.do"/>
+       		       		       		
+       		
+       		
+       		<!-- intercept board controller -->
+       		<mapping path="/centernews_list.do"/>
+       		<mapping path="/centernews_detail.do"/>
+       		<mapping path="/centernews_write.do"/>
+       		<mapping path="/centernews_insert.do"/>
+
+       		<mapping path="/centernewsListDelete.do"/>
+       		<mapping path="/centernewsBoardDelete.do"/>
+       		<mapping path="/centernewsBoardUpdateForm.do"/>
+       		<mapping path="/centernewsBoardUpdate.do"/>
+       		
+       		<mapping path="/newsletter_list.do"/>
+       		<mapping path="/newsletter_detail.do"/>
+       		<mapping path="/newsletter_write.do"/>
+       		<mapping path="/newsletter_insert.do"/>
+
+       		<mapping path="/newsletterListDelete.do"/>
+       		<mapping path="/newsletterBoardDelete.do"/>
+       		<mapping path="/newsletterBoardUpdateForm.do"/>
+       		<mapping path="/newsletterBoardUpdate.do"/>
+            
+       		<mapping path="/photo_list.do"/>
+       		<mapping path="/photo_detail.do"/>
+       		<mapping path="/photo_write.do"/>
+       		<mapping path="/photo_insert.do"/>
+
+       		<mapping path="/photoListDelete.do"/>
+       		<mapping path="/photoBoardDelete.do"/>
+       		<mapping path="/photoBoardUpdateForm.do"/>
+       		<mapping path="/photoBoardUpdate.do"/>
+            
+       		<mapping path="/bid_list.do"/>
+       		<mapping path="/bid_detail.do"/>
+       		<mapping path="/bid_write.do"/>
+       		<mapping path="/bid_insert.do"/>
+
+       		<mapping path="/bidListDelete.do"/>
+       		<mapping path="/bidBoardDelete.do"/>
+       		<mapping path="/bidBoardUpdateForm.do"/>
+       		<mapping path="/bidBoardUpdate.do"/>
+       		
+       		<mapping path="/inquiry_list.do"/>
+       		<mapping path="/inquiry_detail.do"/>
+       		<mapping path="/inquiry_write.do"/>
+       		<mapping path="/inquiry_insert.do"/>
+
+       		<mapping path="/inquiryListDelete.do"/>
+       		<mapping path="/inquiryBoardDelete.do"/>
+       		<mapping path="/inquiryBoardUpdateForm.do"/>
+       		<mapping path="/inquiryBoardUpdate.do"/>
+       		
+       		<mapping path="/lost_list.do"/>
+       		<mapping path="/lost_detail.do"/>
+       		<mapping path="/lost_write.do"/>
+       		<mapping path="/lost_insert.do"/>
+
+       		<mapping path="/lostListDelete.do"/>
+       		<mapping path="/lostBoardDelete.do"/>
+       		<mapping path="/lostBoardUpdateForm.do"/>
+       		<mapping path="/lostBoardUpdate.do"/>
+       		
+       		<mapping path="/data_list.do"/>
+       		<mapping path="/data_detail.do"/>
+       		<mapping path="/data_write.do"/>
+       		<mapping path="/data_insert.do"/>
+
+       		<mapping path="/dataListDelete.do"/>
+       		<mapping path="/dataBoardDelete.do"/>
+       		<mapping path="/dataBoardUpdateForm.do"/>
+       		<mapping path="/dataBoardUpdate.do"/>
+       		
+       		
+       		
+       		<!-- intercept cms controller -->
+       		<mapping path="/cms_main.do"/>
+       		<mapping path="/banner_view.do"/>
+       		<mapping path="/load.do"/>
+       		<mapping path="/recruit_list.do"/>
+       		<mapping path="/recruit_view.do"/>
+       		<mapping path="/delete_check.do"/>
+       		<mapping path="/recruit_write_update.do"/>
+       		<mapping path="/write_update_ac.do"/>
+       		<mapping path="/recruit_write.do"/>
+       		<mapping path="/recruit_enrollment.do"/>
+       		<mapping path="/recruit.do"/>
+       		<mapping path="/re_enrollment_view.do"/>
+       		<mapping path="/re_en_add.do"/>
+       		<mapping path="/re_en_add_bt.do"/>
+       		<mapping path="/re_en_add_update/{re_en_no}.do"/>
+       		<mapping path="/enrollment_del.do"/>
+       		<mapping path="/re_en_update.do"/>
+       		<mapping path="/add_update_re.do"/>
+       		<mapping path="/place_add.do"/>
+       		<mapping path="/place_add_action.do"/>
+       		<mapping path="/place_del_action.do"/>
+       		<mapping path="/resume_view.do"/>
+       		<mapping path="/resume_list_del.do"/>
+       		<mapping path="/resume_list_re.do"/>
+       		<mapping path="/privacy_agreement_view.do"/>
+       		<mapping path="/privacy_del_at.do"/>
+       		<mapping path="/sms_view.do"/>
+       		<mapping path="/sms_list.do"/>
+       		<mapping path="/checkplus_main.do"/>
+       		<mapping path="/checkplus_fail.do"/>
+       		<mapping path="/checkplus_seccess.do"/>
+       		<mapping path="/NewFile.do"/>
+       		<mapping path="/convention_list.do"/>
+       		<mapping path="/convention_add.do"/>
+       		<mapping path="/convention_event_add_form.do"/>
+       		<mapping path="/convention_view.do"/>
+       		<mapping path="/convention_list_del.do"/>
+       		<mapping path="/convention_re_add.do"/>
+       		<mapping path="/convention_update.do"/>
+       		<mapping path="/send.do"/>
+       		<mapping path="/banner_c.do"/>
+       		<mapping path="/banner_c1.do"/>
+       		<mapping path="/banner_add.do"/>
+       		<mapping path="/banner_add1.do"/>
+       		<mapping path="/banner_delete.do"/>
+       		<mapping path="/resumefiledown.do"/>
+       		<mapping path="/del_list.do"/>
+
+       		
+       		
+       		
+
+
+			<!-- 관리자 페이지 intercepter 제외 -->
+            <exclude-mapping path="/login.do"/>
+            <exclude-mapping path="/loginCheck.do"/>
+            
+            
+
+            <beans:ref bean="interceptors"/>
+        </interceptor>
+    </interceptors>
+
+
+</beans:beans>

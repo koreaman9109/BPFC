@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	<typeAliases>
+		<typeAlias  type="com.homepage.interlink.model.Board" alias="board"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Recruit" alias="recruit"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Recruit_add" alias="recruit_add"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Placem" alias="placem"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Privacy_agreement" alias="privacy_agreement"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Privacy" alias="privacy"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Resume" alias="resume"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.BoardFile" alias="boardFile"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Admin" alias="admin"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Authority" alias="authority"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Convention" alias="convention"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.SMSSend" alias="smssend"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Banner" alias="banner"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Member" alias="member"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Admin_sms" alias="admin_sms"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Surem_admin" alias="surem_admin"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.SMS_td" alias="sms_td"></typeAlias>
+		<typeAlias  type="com.homepage.interlink.model.Surem_result" alias="surem_result"></typeAlias>
+	</typeAliases>
+
+	<mappers>
+		<mapper resource="Board.xml"></mapper>
+		<mapper resource="Recruit.xml"></mapper>
+		<mapper resource="Recruit_add.xml"></mapper>
+		<mapper resource="Placem.xml"></mapper>
+		<mapper resource="Privacy_agreement.xml"></mapper>
+		<mapper resource="Privacy.xml"></mapper>
+		<mapper resource="Resume.xml"></mapper>
+		<mapper resource="BoardFile.xml"></mapper>
+		<mapper resource="Admin.xml"></mapper>
+		<mapper resource="Authority.xml"></mapper>
+		<mapper resource="Convention.xml"></mapper>
+		<mapper resource="SMSSend.xml"></mapper>
+		<mapper resource="Banner.xml"></mapper>
+		<mapper resource="Member.xml"></mapper>
+		<mapper resource="Admin_sms.xml"></mapper>
+		<mapper resource="Etc.xml"></mapper>
+		<mapper resource="SMS.xml"></mapper>
+	</mappers>
+
+</configuration>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow:/
+
+Sitemap:https://www.bpfmc.or.kr/resources/board/data/20180726_1304829_df0504cc-eb5a-4265-888f-377b893310c4_sitemap.xml
